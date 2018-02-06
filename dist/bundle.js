@@ -80,70 +80,108 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* 1 */
 /***/ (function(module, exports) {
 
-var carousels = document.querySelectorAll('.carousel')
+//This function creates a carousel
+let dragElem = false;
+function Slider(element) {
+  this.el = document.querySelector(element);
+  this.init();
+}
 
-carousels.forEach((elem) => {
-  console.log(1111,elem)
+Slider.prototype = {
+  init: function() {
+    this.links = this.el.querySelectorAll( ".slider-nav a" );     //list of buttons-indicators
+    this.images = this.el.querySelectorAll(".slider-wrapper div") //picture list
+    this.wrapper = this.el.querySelector( ".slider-wrapper" );    //container with pictures
+    this.navigate();
+    this.navigateImage();
+  },
 
-
-
-  let test = function(){
-    console.log('this',this)
-    var slider = this.childNodes[1].childNodes[5]
-    console.log(slider)
-
-    // slider.classList.add('add')
-    // console.log(slider.children[0].style.backgroundColor = 'grey')
-
-
-    var pagination = elem.querySelector('.carousel-pagination'); //ul з точками
-    var bullets = [].slice.call(elem.querySelectorAll('.carousel-bullet')); //масив точок
-    var totalItems = slider.querySelectorAll('.carousel-item').length; //довжина елементів в ul з картинками
-    var percent = (100 / totalItems);
-    var currentIndex = 0;
-    function next(){
-      slideTo(currentIndex + 1);
+  navigateImage: function () {
+    for (let i = 0; i < this.images.length; i++) {
+      let image = this.images[i]
+      this.slideImage(image);
     }
+  },
 
-    function prev(){
-      slideTo(currentIndex - 1);
+  navigate: function() {
+    for(let i = 0; i < this.links.length; ++i) {
+      let link = this.links[i];
+      this.slide(link);
     }
+  },
 
-    function slideTo(index){
-      if (index < 0) {
-        index = totalItems - 1
-      } else {
-        if (index >= totalItems) {
-          index = 0
-        } else {
-          index
-        }
-      }
+//function that moves pictures
+  slide: function(element) {
+    // console.log(element) //list 'a'
+    let self = this;
+    // console.log(self)      //list of slider objects
+    element.addEventListener( "click", function(e) {
+      e.preventDefault();
+      let a = this;
+      self.setCurrentLink(a);
+      let index = parseInt(a.getAttribute("data-slide"), 10 ) + 1;                  //we obtain the index
+      let currentSlide = self.el.querySelector( ".slide:nth-child(" + index + ")"); //we get the picture element
+      self.wrapper.style.left = "-" + currentSlide.offsetLeft + "px";               //how many pixels do we move                                                                                                                   the picture
 
-      slider.style.transform = 'translate(-' + (index * percent) + '%, 0)';
-      bullets[currentIndex].classList.remove('active-bullet');
-      bullets[index].classList.add('active-bullet');
-      currentIndex = index;
-    }
-    bullets[currentIndex].classList.add('active-bullet');
-
-    elem.addEventListener('click', prev, false);
-    elem.addEventListener('click', next, false);
-
-    pagination.addEventListener('click', function(e){
-      var index = bullets.indexOf(e.target);
-      if(index !== -1){
-        slideTo(index);
-      }
     }, false);
+  },
 
+  slideImage: function (el) {
+    let self = this;
+    // console.log(self)        //list of slider objects
+    el.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+      let image = this;
+      console.log(image)
+      dragElem = true
+      //getting coordinates
+      let domRect = e.target.getBoundingClientRect()   //вертає розмір елемента і позицію відносно вікна
+      console.log(domRect)
+      let clientX = e.clientX     //координати курсора в момент кліка відносно вікна
+      console.log(clientX)
+      dragElem = clientX - (domRect.left + e.target.clientLeft) //координати курсора видносно ливого верхнього угла елемента
+      console.log(dragElem)
+
+      el.addEventListener("mousemove", function (e) {
+        dragElem = true
+        console.log(dragElem)
+      })
+
+
+      el.addEventListener("mouseup", function () {
+        dragElem= false;
+      }, false);
+
+
+    }, false)
+  },
+
+
+//function, which means that the indicator is active
+  setCurrentLink: function(link) {
+    let parent = link.parentNode;  //parental container with 'a'
+    // console.log(parent)
+    let a = parent.querySelectorAll("a");  //list 'a'
+    link.className = "current";
+
+    for( let j = 0; j < a.length; ++j ) {
+      let cur = a[j];
+      if(cur !== link) {
+        cur.className = "";
+      }
+    }
   }
-  test.bind(this)
-  elem.addEventListener('click', test)
+};
 
-})
+document.addEventListener( "DOMContentLoaded", function() {
+  var Slider1 = new Slider( "#slider" );
 
+});
 
+document.addEventListener( "DOMContentLoaded", function() {
+  var Slider2 = new Slider( "#slider1" );
+
+});
 
 
 
