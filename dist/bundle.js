@@ -81,7 +81,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /***/ (function(module, exports) {
 
 //This function creates a carousel
-let dragElem = false;
 function Slider(element) {
   this.el = document.querySelector(element);
   this.init();
@@ -92,12 +91,20 @@ Slider.prototype = {
     this.links = this.el.querySelectorAll( ".slider-nav a" );     //list of buttons-indicators
     this.images = this.el.querySelectorAll(".slider-wrapper div") //picture list
     this.wrapper = this.el.querySelector( ".slider-wrapper" );    //container with pictures
+    this.imagesLength = this.el.querySelectorAll(".slider-wrapper div").length
+    this.imgWidth = parseFloat(getComputedStyle(this.el.querySelector('.slider-wrapper div')).width);
+    this.maxLeft = (this.imagesLength * this.imgWidth) - this.imgWidth //2800px
+
+    this.diff = null;
+    this.dragElem = false;
+
     this.navigate();
     this.navigateImage();
   },
 
   navigateImage: function () {
     for (let i = 0; i < this.images.length; i++) {
+      this.images[i].style.transition = 'all 1s 0.1s ease-in';
       let image = this.images[i]
       this.slideImage(image);
     }
@@ -110,7 +117,7 @@ Slider.prototype = {
     }
   },
 
-//function that moves pictures
+//functions that moves pictures
   slide: function(element) {
     // console.log(element) //list 'a'
     let self = this;
@@ -119,48 +126,69 @@ Slider.prototype = {
       e.preventDefault();
       let a = this;
       self.setCurrentLink(a);
-      let index = parseInt(a.getAttribute("data-slide"), 10 ) + 1;                  //we obtain the index
+      let index = parseInt(a.getAttribute("data-slide"), 10) + 1;                  //we obtain the index
+      console.log(index)
       let currentSlide = self.el.querySelector( ".slide:nth-child(" + index + ")"); //we get the picture element
       self.wrapper.style.left = "-" + currentSlide.offsetLeft + "px";               //how many pixels do we move                                                                                                                   the picture
-
     }, false);
   },
 
   slideImage: function (el) {
     let self = this;
-    // console.log(self)        //list of slider objects
     el.addEventListener("mousedown", function (e) {
       e.preventDefault();
-      let image = this;
-      console.log(image)
-      dragElem = true
+      self.dragElem  = true;
+
       //getting coordinates
       let domRect = e.target.getBoundingClientRect()   //вертає розмір елемента і позицію відносно вікна
-      console.log(domRect)
-      let clientX = e.clientX     //координати курсора в момент кліка відносно вікна
-      console.log(clientX)
-      dragElem = clientX - (domRect.left + e.target.clientLeft) //координати курсора видносно ливого верхнього угла елемента
-      console.log(dragElem)
+      let clientX = e.clientX                         //координати курсора в момент кліка відносно вікна
+      this.dragElem = clientX - (domRect.left + e.target.clientLeft)  //координати курсора видносно ливого верхнього угла елемента
 
       el.addEventListener("mousemove", function (e) {
-        dragElem = true
-        console.log(dragElem)
-      })
+        if (self.dragElem) {
+          if (this.diff) {
+            this.diff = parseInt(self.wrapper.style.left || 0) + (e.clientX - this.diff) * 3;
+            if (this.diff > 0) {
+              this.diff = 0;
+            } else if (this.maxLeft < Math.abs(this.diff)) {
+              this.diff = -this.maxLeft;
+            }
+            self.wrapper.style.left = this.diff + 'px';
+          }
+          this.diff = e.clientX;
+        }
+      }, false)
 
 
       el.addEventListener("mouseup", function () {
-        dragElem= false;
-      }, false);
+        event.preventDefault();
+        this.imgWidth = parseFloat(getComputedStyle(self.wrapper.querySelector('.slider-wrapper div')).width);
+        let slideLeft = Math.abs(parseFloat(getComputedStyle(self.wrapper).left));
+        let ImageIndex = (slideLeft / this.imgWidth) | 0;
+        if ((slideLeft % this.imgWidth) > (this.imgWidth / 6)) {
+          ImageIndex++;
+        }
+        if (slideLeft >= self.maxLeft) {
+          ImageIndex = 0
+        }
+        if (slideLeft <= 0) {
+          ImageIndex = 0
+        }
 
+        self.wrapper.style.left = -ImageIndex * this.imgWidth + 'px';
+        self.dragElem = false;
+        this.diff = null;
+        if (ImageIndex === 1) {
+          self.wrapper.classList.add('current')
+        }
+      }, false);
 
     }, false)
   },
 
-
 //function, which means that the indicator is active
   setCurrentLink: function(link) {
     let parent = link.parentNode;  //parental container with 'a'
-    // console.log(parent)
     let a = parent.querySelectorAll("a");  //list 'a'
     link.className = "current";
 
@@ -170,16 +198,20 @@ Slider.prototype = {
         cur.className = "";
       }
     }
-  }
+  },
 };
 
+document.addEventListener('mousemove', function (event) {
+  event.preventDefault();
+}, false);
+
+
 document.addEventListener( "DOMContentLoaded", function() {
-  var Slider1 = new Slider( "#slider" );
+  let Slider1 = new Slider( "#slider" );
 
 });
-
 document.addEventListener( "DOMContentLoaded", function() {
-  var Slider2 = new Slider( "#slider1" );
+  let Slider2 = new Slider( "#slider1" );
 
 });
 
