@@ -6,13 +6,12 @@ function Slider(element) {
 
 Slider.prototype = {
   init: function() {
-    this.links = this.el.querySelectorAll(".slider-nav a" );     //list of buttons-indicators
-    this.images = this.el.querySelectorAll(".slider-wrapper div") //picture list
-    this.wrapper = this.el.querySelector(".slider-wrapper");    //container with pictures
+    this.links = this.el.querySelectorAll(".slider-nav a" );        // list of buttons-indicators
+    this.images = this.el.querySelectorAll(".slider-wrapper div")  // picture list
+    this.wrapper = this.el.querySelector(".slider-wrapper");      // container with pictures
     this.imagesLength = this.el.querySelectorAll(".slider-wrapper div").length
     this.imgWidth = parseFloat(getComputedStyle(this.el.querySelector(".slider-wrapper div")).width);
-    this.maxLeft = (this.imagesLength * this.imgWidth) - this.imgWidth //2800px
-
+    this.maxLeft = (this.imagesLength * this.imgWidth) - this.imgWidth  // 2800px
     this.diff = null;
     this.dragElem = false;
     this.currentIndex = 0;
@@ -43,8 +42,8 @@ Slider.prototype = {
       e.preventDefault();
       let a = this;
       self.setCurrentLink(a);
-      let index = parseInt(a.getAttribute("data-slide"), 10) + 1;                   //we obtain the index
-      let currentSlide = self.el.querySelector( ".slide:nth-child(" + index + ")"); //we get the picture element
+      let index = parseInt(a.getAttribute("data-slide"), 10) + 1;                   // we obtain the index
+      let currentSlide = self.el.querySelector( ".slide:nth-child(" + index + ")"); // we get the picture element
       self.wrapper.style.left = "-" + currentSlide.offsetLeft + "px";               //how many pixels do we move                                                                                                                   the picture
     }, false);
   },
@@ -130,10 +129,9 @@ Slider.prototype = {
 
 // function, which means that the indicator is active
   setCurrentLink: function(link) {
-    let parent = link.parentNode;  // parental container with 'a'
+    let parent = link.parentNode;           // parental container with 'a'
     let a = parent.querySelectorAll("a");  //list 'a'
     link.className = "current";
-
     for( let j = 0; j < a.length; ++j ) {
       let cur = a[j];
       if(cur !== link) {
@@ -148,9 +146,9 @@ document.addEventListener("mousemove", function (event) {
 }, false);
 
 document.addEventListener("DOMContentLoaded", function() {
-  let Slider1 = new Slider("#slider" );
+  let Slider1 = new Slider("#slider");
 });
 
 document.addEventListener("DOMContentLoaded", function() {
-  let Slider2 = new Slider("#slider1" );
+  let Slider2 = new Slider("#slider1");
 });
